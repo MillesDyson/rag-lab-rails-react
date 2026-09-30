@@ -2,7 +2,7 @@ module Api
   module V1
     class DocumentsController < ApplicationController
       before_action :authorize_internal!, only: :ingested
-      before_action :set_document, only: %i[destroy ingested]
+      before_action :set_document, only: %i[destroy text ingested]
 
       def index
         render json: Document.recent.map { |document| DocumentSerializer.call(document) }
@@ -20,6 +20,11 @@ module Api
         else
           render json: { error: document.errors.full_messages.to_sentence }, status: :unprocessable_entity
         end
+      end
+
+      # GET /api/v1/documents/:id/text
+      def text
+        render json: { text: @document.extracted_text }
       end
 
       def destroy
@@ -42,7 +47,8 @@ module Api
 
       def ingestion_params
         params.permit(
-          :status, :kind, :chunks_count, :characters_count, :extracted_preview, :error
+          :status, :kind, :chunks_count, :characters_count,
+          :extracted_text, :extracted_preview, :error
         )
       end
 

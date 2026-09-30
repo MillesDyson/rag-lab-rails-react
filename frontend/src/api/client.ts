@@ -17,6 +17,9 @@ export const api = {
     return fetch('/api/v1/documents', { method: 'POST', body: form }).then(parse<Doc>)
   },
 
+  fetchText: (id: number) =>
+    fetch(`/api/v1/documents/${id}/text`).then(parse<{ text: string | null }>),
+
   deleteDocument: (id: number) =>
     fetch(`/api/v1/documents/${id}`, { method: 'DELETE' }).then((response) => {
       if (!response.ok) throw new Error('Nao foi possivel remover o documento')

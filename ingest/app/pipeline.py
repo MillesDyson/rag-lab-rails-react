@@ -1,7 +1,10 @@
 """Orquestra a ingestao: baixa -> extrai texto -> divide -> vetoriza -> grava."""
 
+import logging
 import mimetypes
 import tempfile
+import time
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -13,19 +16,28 @@ from . import extractors
 from .config import settings
 from .vectorstore import store
 
+logger = logging.getLogger("raglab.pipeline")
+
+PREVIEW_LENGTH = 500
+
 
 @dataclass
 class Result:
     chunks: int
     characters: int
     kind: str
-    preview: str
+    text: str
 
 
 def run(document_id: int, file_url: str, content_type: str, filename: str) -> Result:
-    path = _download(file_url, filename)
+    # cada etapa e cronometrada: uma chamada lenta a OpenAI (rate limit, retry
+    # com backoff) fica visivel no log em vez de parecer um travamento
+    with _timed(document_id, "download"):
+        path = _download(file_url, filename)
+
     try:
-        text, kind = extractors.extract(path, content_type)
+        with _timed(document_id, f"extract ({content_type})"):
+            text, kind = extractors.extract(path, content_type)
     finally:
         path.unlink(missing_ok=True)
 
@@ -48,14 +60,18 @@ def run(document_id: int, file_url: str, content_type: str, filename: str) -> Re
     ]
     ids = [f"doc-{document_id}-chunk-{index}" for index in range(len(documents))]
 
-    store().add_documents(documents=documents, ids=ids)
+    with _timed(document_id, f"embed + upsert ({len(documents)} chunks)"):
+        store().add_documents(documents=documents, ids=ids)
 
-    return Result(
-        chunks=len(documents),
-        characters=len(text),
-        kind=kind,
-        preview=text[:500],
-    )
+    return Result(chunks=len(documents), characters=len(text), kind=kind, text=text)
+
+
+@contextmanager
+def _timed(document_id: int, label: str):
+    started = time.monotonic()
+    logger.info("[doc %s] %s...", document_id, label)
+    yield
+    logger.info("[doc %s] %s levou %.1fs", document_id, label, time.monotonic() - started)
 
 
 def _split(text: str) -> list[str]:

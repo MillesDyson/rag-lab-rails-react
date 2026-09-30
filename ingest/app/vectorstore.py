@@ -46,4 +46,13 @@ def _index_host(name: str) -> str:
 
 
 def delete_document(document_id: int) -> None:
-    store().delete(filter={"document_id": document_id})
+    """Apaga os vetores de um documento.
+
+    Indices serverless (e o emulador local) nao aceitam delete por filtro de
+    metadata, entao usamos o prefixo dos ids, que seguem o padrao
+    "doc-<id>-chunk-<n>" definido no pipeline.
+    """
+    index = client().Index(host=_index_host(settings().pinecone_index))
+    for page in index.list(prefix=f"doc-{document_id}-chunk-"):
+        if page:
+            index.delete(ids=page)

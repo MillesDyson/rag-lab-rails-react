@@ -28,7 +28,23 @@ type Props = {
 }
 
 export function DocumentRow({ doc, onChanged }: Props) {
-  const [open, setOpen] = useState(false)
+  const [text, setText] = useState<string | null>(null)
+  const [loadingText, setLoadingText] = useState(false)
+
+  const open = text !== null
+
+  // o texto completo so vem quando pedido: uma transcricao de video inteira
+  // nao precisa trafegar em toda listagem
+  async function toggleText() {
+    if (open) return setText(null)
+    setLoadingText(true)
+    try {
+      const response = await api.fetchText(doc.id)
+      setText(response.text ?? '(sem texto)')
+    } finally {
+      setLoadingText(false)
+    }
+  }
 
   async function remove() {
     await api.deleteDocument(doc.id)
@@ -49,8 +65,8 @@ export function DocumentRow({ doc, onChanged }: Props) {
         </div>
         <StatusBadge status={doc.status} />
         {doc.extractedPreview && (
-          <button className="link" onClick={() => setOpen(!open)}>
-            {open ? 'ocultar' : 'ver texto'}
+          <button className="link" onClick={toggleText} disabled={loadingText}>
+            {loadingText ? 'carregando...' : open ? 'ocultar' : 'ver texto'}
           </button>
         )}
         <button className="link link--danger" onClick={remove}>
@@ -59,7 +75,7 @@ export function DocumentRow({ doc, onChanged }: Props) {
       </div>
 
       {doc.error && <p className="error">{doc.error}</p>}
-      {open && doc.extractedPreview && <pre className="preview">{doc.extractedPreview}</pre>}
+      {open && <pre className="preview">{text}</pre>}
     </li>
   )
 }

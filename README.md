@@ -97,6 +97,13 @@ docker compose exec api bin/rails generate model Foo
 docker compose exec api bundle add alguma_gem   # depois: docker compose restart api
 ```
 
+Ao mudar o `.env`, `restart` **não** basta — ele reinicia o processo dentro do
+container existente, que mantém o environment de quando foi criado:
+
+```bash
+docker compose up -d --force-recreate ingest
+```
+
 As gems ficam num volume nomeado (`bundle`), então adicionar uma gem só exige
 reiniciar o container — não rebuildar a imagem.
 

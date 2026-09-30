@@ -1,3 +1,4 @@
+import logging
 import traceback
 
 from fastapi import BackgroundTasks, FastAPI, Header, HTTPException
@@ -7,6 +8,9 @@ from . import callbacks, pipeline
 from .config import settings
 from .extractors import UnsupportedFile
 from .vectorstore import delete_document
+
+# o uvicorn configura apenas os loggers dele; sem isso o nosso fica mudo
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(message)s")
 
 app = FastAPI(title="raglab-ingest")
 
@@ -70,6 +74,7 @@ def _process(request: IngestRequest) -> None:
                 "chunks_count": result.chunks,
                 "characters_count": result.characters,
                 "kind": result.kind,
-                "extracted_preview": result.preview,
+                "extracted_text": result.text,
+                "extracted_preview": result.text[:pipeline.PREVIEW_LENGTH],
             },
         )
