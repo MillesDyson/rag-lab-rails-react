@@ -1,0 +1,75 @@
+import traceback
+
+from fastapi import BackgroundTasks, FastAPI, Header, HTTPException
+from pydantic import BaseModel
+
+from . import callbacks, pipeline
+from .config import settings
+from .extractors import UnsupportedFile
+from .vectorstore import delete_document
+
+app = FastAPI(title="raglab-ingest")
+
+
+class IngestRequest(BaseModel):
+    document_id: int
+    file_url: str
+    content_type: str
+    filename: str
+
+
+@app.get("/health")
+def health() -> dict:
+    return {"status": "ok"}
+
+
+@app.post("/ingest", status_code=202)
+def ingest(
+    request: IngestRequest,
+    background: BackgroundTasks,
+    x_internal_token: str = Header(default=""),
+) -> dict:
+    _authorize(x_internal_token)
+    background.add_task(_process, request)
+    return {"status": "accepted", "document_id": request.document_id}
+
+
+@app.delete("/documents/{document_id}")
+def destroy(document_id: int, x_internal_token: str = Header(default="")) -> dict:
+    _authorize(x_internal_token)
+    delete_document(document_id)
+    return {"status": "deleted", "document_id": document_id}
+
+
+def _authorize(token: str) -> None:
+    if token != settings().internal_token:
+        raise HTTPException(status_code=401, detail="token interno invalido")
+
+
+def _process(request: IngestRequest) -> None:
+    try:
+        result = pipeline.run(
+            document_id=request.document_id,
+            file_url=request.file_url,
+            content_type=request.content_type,
+            filename=request.filename,
+        )
+    except UnsupportedFile as error:
+        callbacks.notify(request.document_id, {"status": "failed", "error": str(error)})
+    except Exception as error:
+        traceback.print_exc()
+        callbacks.notify(
+            request.document_id,
+            {"status": "failed", "error": f"{type(error).__name__}: {error}"},
+        )
+    else:
+        callbacks.notify(
+            request.document_id,
+            {
+                "status": "completed",
+                "chunks_count": result.chunks,
+                "characters_count": result.characters,
+                "kind": result.kind,
+                "extracted_preview": result.preview,
+            },
+        )

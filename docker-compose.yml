@@ -1,0 +1,77 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: raglab
+      POSTGRES_PASSWORD: raglab
+      POSTGRES_DB: raglab_development
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U raglab"]
+      interval: 5s
+      retries: 10
+
+  # Emulador local do Pinecone. Nao persiste dados entre restarts.
+  # Cada indice criado ganha uma porta propria (5081, 5082...), por isso a faixa.
+  # PINECONE_HOST define o host que describe_index() devolve, e e por ele que o
+  # container de ingestao alcanca o indice. Tem que ser "pinecone.local" e nao
+  # "pinecone": o cliente rejeita host sem ponto, por achar que voce passou o
+  # nome do indice por engano. Dai o alias de rede.
+  pinecone:
+    image: ghcr.io/pinecone-io/pinecone-local:latest
+    platform: linux/amd64
+    environment:
+      PORT: 5080
+      PINECONE_HOST: pinecone.local
+    ports:
+      - "5080-5090:5080-5090"
+    networks:
+      default:
+        aliases:
+          - pinecone.local
+
+  api:
+    build:
+      context: ./api
+      args:
+        UID: "${UID:-1000}"
+        GID: "${GID:-1000}"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://raglab:raglab@postgres:5432/raglab_development
+      INGEST_SERVICE_URL: http://ingest:8000
+      RAILS_HOST: api:3000
+    volumes:
+      - ./api:/app
+      - bundle:/bundle
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+
+  ingest:
+    build:
+      context: ./ingest
+      args:
+        UID: "${UID:-1000}"
+        GID: "${GID:-1000}"
+    env_file: .env
+    environment:
+      PINECONE_HOST: http://pinecone.local:5080
+      RAILS_CALLBACK_URL: http://api:3000
+    volumes:
+      - ./ingest:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - pinecone
+
+volumes:
+  pgdata:
+  bundle:

@@ -1,0 +1,24 @@
+[project]
+name = "raglab-ingest"
+version = "0.1.0"
+description = "Servico de ingestao: extrai texto de midia, gera embeddings e grava no Pinecone"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "python-multipart>=0.0.12",
+    "pydantic-settings>=2.6",
+    "httpx>=0.27",
+    "python-dotenv>=1.0",
+    "langchain>=0.3",
+    "langchain-core>=0.3",
+    "langchain-openai>=0.2",
+    "langchain-pinecone>=0.2",
+    "langchain-text-splitters>=0.3",
+    "pinecone>=5.4",
+    "llama-parse>=0.5",
+    "openai>=1.54",
+]
+
+[tool.uv]
+package = false
