@@ -5,5 +5,28 @@ __pycache__/
 .venv/
 /api/tmp/
 /api/log/
-/api/storage/
 /frontend/dist/
+
+# Arquivos enviados pelo usuario nunca entram no repositorio.
+# ActiveStorage grava em api/storage; as variantes vao para api/tmp/storage.
+/api/storage/
+**/storage/
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.heic
+*.mp3
+*.wav
+*.m4a
+*.mp4
+*.mov
+*.avi
+*.docx
+*.xlsx
+
+# excecoes: o que o projeto precisa versionar
+!/samples/**
+!/frontend/src/assets/**
+!/frontend/public/**
