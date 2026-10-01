@@ -15,6 +15,4 @@ def notify(document_id: int, payload: dict) -> None:
             timeout=30,
         ).raise_for_status()
     except httpx.HTTPError as error:
-        # nao ha o que fazer aqui alem de registrar: o Rails vai ficar em "processing"
-        # ate alguem reenviar. Numa versao seria melhor ter retry.
         print(f"[callback] falhou para o documento {document_id}: {error}")

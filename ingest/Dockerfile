@@ -1,6 +1,5 @@
 FROM python:3.12-slim
 
-# ffmpeg extrai o audio dos videos antes de mandar pro Whisper
 RUN apt-get update -qq \
     && apt-get install -y --no-install-recommends ffmpeg ca-certificates \
     && rm -rf /var/lib/apt/lists/*
@@ -11,7 +10,6 @@ ARG UID=1000
 ARG GID=1000
 RUN groupadd -g $GID app && useradd -u $UID -g $GID -m app
 
-# a venv fica fora de /app: /app e bind mount e sobrescreveria o .venv da imagem
 ENV UV_PROJECT_ENVIRONMENT=/opt/venv \
     UV_COMPILE_BYTECODE=1 \
     PATH="/opt/venv/bin:$PATH"

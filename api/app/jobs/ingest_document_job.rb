@@ -12,8 +12,6 @@ class IngestDocumentJob < ApplicationJob
 
   private
 
-  # URL assinada que o container de ingestao usa para baixar o arquivo.
-  # O host precisa ser o nome do servico no compose, nao localhost.
   def file_url_for(document)
     Rails.application.routes.url_helpers.rails_blob_url(
       document.file,

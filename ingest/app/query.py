@@ -66,7 +66,6 @@ def run(pergunta: str, k: int = 5, kinds: list[str] | None = None) -> Answer:
 
 
 def retrieve(pergunta: str, k: int = 5, kinds: list[str] | None = None) -> list[Source]:
-    # o Pinecone guarda todo numero de metadata como float, dai o int()
     filtro = {"kind": {"$in": kinds}} if kinds else None
     encontrados = store().similarity_search_with_score(pergunta, k=k, filter=filtro)
 

@@ -8,7 +8,6 @@ from openai import OpenAI
 
 from ..config import settings
 
-# a API do Whisper recusa arquivos acima de 25MB; cortamos antes de chegar la
 MAX_UPLOAD_BYTES = 24 * 1024 * 1024
 SEGMENT_SECONDS = 600
 

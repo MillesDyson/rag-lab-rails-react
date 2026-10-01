@@ -22,7 +22,6 @@ module Api
         end
       end
 
-      # GET /api/v1/documents/:id/text
       def text
         render json: { text: @document.extracted_text }
       end
@@ -33,7 +32,6 @@ module Api
         head :no_content
       end
 
-      # POST /api/v1/documents/:id/ingested
       def ingested
         @document.update!(ingestion_params)
         head :ok

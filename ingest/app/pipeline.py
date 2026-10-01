@@ -30,8 +30,6 @@ class Result:
 
 
 def run(document_id: int, file_url: str, content_type: str, filename: str) -> Result:
-    # cada etapa e cronometrada: uma chamada lenta a OpenAI (rate limit, retry
-    # com backoff) fica visivel no log em vez de parecer um travamento
     with _timed(document_id, "download"):
         path = _download(file_url, filename)
 

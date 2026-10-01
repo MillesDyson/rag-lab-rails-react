@@ -9,7 +9,6 @@ from .config import settings
 from .extractors import UnsupportedFile
 from .vectorstore import delete_document
 
-# o uvicorn configura apenas os loggers dele; sem isso o nosso fica mudo
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(message)s")
 
 app = FastAPI(title="raglab-ingest")

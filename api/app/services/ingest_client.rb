@@ -1,7 +1,6 @@
 require "net/http"
 require "json"
 
-# Cliente HTTP do servico Python de ingestao.
 class IngestClient
   class Error < StandardError; end
 
@@ -9,8 +8,6 @@ class IngestClient
     @base_url = base_url
   end
 
-  # Dispara a ingestao. O servico responde 202 na hora e trabalha em background,
-  # avisando o Rails pelo callback quando terminar.
   def ingest(document, file_url:)
     post("/ingest", {
       document_id: document.id,
@@ -27,7 +24,6 @@ class IngestClient
   def delete_vectors(document_id)
     request(Net::HTTP::Delete.new(uri_for("/documents/#{document_id}")))
   rescue Error => e
-    # remover o documento nao pode falhar so porque o Pinecone esta fora do ar
     Rails.logger.warn("[IngestClient] falha ao apagar vetores do documento #{document_id}: #{e.message}")
   end
 

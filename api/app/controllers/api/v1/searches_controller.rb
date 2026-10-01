@@ -19,8 +19,6 @@ module Api
         params.fetch(:k, 5).to_i.clamp(1, MAX_RESULTS)
       end
 
-      # o servico de ingestao so conhece o que esta no metadata do vetor;
-      # o nome atual do arquivo e o status vem do banco
       def decorate(sources)
         documents = Document.where(id: sources.map { |s| s["document_id"] }.uniq).index_by(&:id)
 

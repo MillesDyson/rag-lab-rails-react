@@ -14,12 +14,6 @@ services:
       interval: 5s
       retries: 10
 
-  # Emulador local do Pinecone. Nao persiste dados entre restarts.
-  # Cada indice criado ganha uma porta propria (5081, 5082...), por isso a faixa.
-  # PINECONE_HOST define o host que describe_index() devolve, e e por ele que o
-  # container de ingestao alcanca o indice. Tem que ser "pinecone.local" e nao
-  # "pinecone": o cliente rejeita host sem ponto, por achar que voce passou o
-  # nome do indice por engano. Dai o alias de rede.
   pinecone:
     image: ghcr.io/pinecone-io/pinecone-local:latest
     platform: linux/amd64

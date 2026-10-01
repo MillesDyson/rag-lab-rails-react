@@ -33,8 +33,6 @@ export function DocumentRow({ doc, onChanged }: Props) {
 
   const open = text !== null
 
-  // o texto completo so vem quando pedido: uma transcricao de video inteira
-  // nao precisa trafegar em toda listagem
   async function toggleText() {
     if (open) return setText(null)
     setLoadingText(true)

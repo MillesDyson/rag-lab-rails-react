@@ -4,8 +4,6 @@ type Props = {
   onHighlight: (index: number | null) => void
 }
 
-// Quebra a resposta em texto e citações [1], [2], transformando cada citação
-// num botão que destaca a fonte correspondente.
 export function AnswerText({ text, highlighted, onHighlight }: Props) {
   const parts = text.split(/(\[\d+\])/g)
 

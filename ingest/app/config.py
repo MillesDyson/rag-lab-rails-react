@@ -3,8 +3,6 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# fora do container o .env fica na raiz do monorepo, um nivel acima de ingest/;
-# dentro do container as variaveis chegam pelo env_file do compose
 ROOT_ENV = Path(__file__).resolve().parents[2] / ".env"
 
 
@@ -24,7 +22,6 @@ class Settings(BaseSettings):
     rails_callback_url: str = "http://localhost:3000"
     internal_token: str = "dev-token-trocar-depois"
 
-    # text-embedding-3-small -> 1536 dimensoes
     embedding_model: str = "text-embedding-3-small"
     embedding_dimensions: int = 1536
     vision_model: str = "gpt-4o-mini"

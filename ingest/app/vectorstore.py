@@ -32,7 +32,6 @@ def store() -> PineconeVectorStore:
             name=name,
             dimension=settings().embedding_dimensions,
             metric="cosine",
-            # o emulador ignora cloud/region, mas a spec e obrigatoria
             spec=ServerlessSpec(cloud="aws", region="us-east-1"),
         )
 

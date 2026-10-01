@@ -1,4 +1,3 @@
-# O front consome camelCase; a conversao fica concentrada aqui.
 class DocumentSerializer
   def self.call(document)
     {

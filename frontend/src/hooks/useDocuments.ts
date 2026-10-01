@@ -4,10 +4,6 @@ import type { Doc } from '../types'
 
 const POLL_INTERVAL = 2000
 
-/**
- * Mantem a lista de documentos em sincronia com o back.
- * Enquanto houver algum documento em andamento, faz polling a cada 2s.
- */
 export function useDocuments() {
   const [documents, setDocuments] = useState<Doc[]>([])
   const [error, setError] = useState<string | null>(null)
