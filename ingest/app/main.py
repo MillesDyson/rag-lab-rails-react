@@ -4,7 +4,7 @@ import traceback
 from fastapi import BackgroundTasks, FastAPI, Header, HTTPException
 from pydantic import BaseModel
 
-from . import callbacks, pipeline
+from . import callbacks, pipeline, query
 from .config import settings
 from .extractors import UnsupportedFile
 from .vectorstore import delete_document
@@ -13,6 +13,12 @@ from .vectorstore import delete_document
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(message)s")
 
 app = FastAPI(title="raglab-ingest")
+
+
+class QueryRequest(BaseModel):
+    question: str
+    k: int = 5
+    kinds: list[str] | None = None
 
 
 class IngestRequest(BaseModel):
@@ -25,6 +31,16 @@ class IngestRequest(BaseModel):
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+@app.post("/query")
+def ask(request: QueryRequest, x_internal_token: str = Header(default="")) -> dict:
+    _authorize(x_internal_token)
+    resultado = query.run(request.question, k=request.k, kinds=request.kinds)
+    return {
+        "answer": resultado.answer,
+        "sources": [vars(source) for source in resultado.sources],
+    }
 
 
 @app.post("/ingest", status_code=202)

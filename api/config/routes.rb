@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
+      # consulta: pergunta -> trechos relevantes -> resposta com citacoes
+      resource :search, only: :create, controller: "searches"
+
       resources :documents, only: %i[index create destroy] do
         member do
           # o texto extraido pode ser longo (transcricao de video inteira),

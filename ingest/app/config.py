@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     embedding_model: str = "text-embedding-3-small"
     embedding_dimensions: int = 1536
     vision_model: str = "gpt-4o-mini"
+    answer_model: str = "gpt-4o-mini"
     whisper_model: str = "whisper-1"
 
     chunk_size: int = 1000

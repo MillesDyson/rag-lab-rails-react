@@ -13,3 +13,18 @@ export type Doc = {
   error: string | null
   createdAt: string
 }
+
+export type Source = {
+  documentId: number
+  filename: string
+  kind: string
+  chunkIndex: number
+  score: number
+  excerpt: string
+  missing: boolean
+}
+
+export type SearchResult = {
+  answer: string
+  sources: Source[]
+}

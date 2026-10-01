@@ -20,6 +20,10 @@ class IngestClient
     })
   end
 
+  def query(question, k:, kinds:)
+    post("/query", { question: question, k: k, kinds: kinds.presence })
+  end
+
   def delete_vectors(document_id)
     request(Net::HTTP::Delete.new(uri_for("/documents/#{document_id}")))
   rescue Error => e

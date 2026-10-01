@@ -1,4 +1,4 @@
-import type { Doc } from '../types'
+import type { Doc, SearchResult } from '../types'
 
 async function parse<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -16,6 +16,13 @@ export const api = {
     form.append('file', file)
     return fetch('/api/v1/documents', { method: 'POST', body: form }).then(parse<Doc>)
   },
+
+  search: (question: string, kinds: string[]) =>
+    fetch('/api/v1/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, k: 5, kinds }),
+    }).then(parse<SearchResult>),
 
   fetchText: (id: number) =>
     fetch(`/api/v1/documents/${id}/text`).then(parse<{ text: string | null }>),

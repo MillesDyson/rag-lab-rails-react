@@ -143,6 +143,37 @@ frontend/            Vite + React (roda no host)
   components/        UploadDropzone, DocumentList, DocumentRow, StatusBadge
 ```
 
+## Consulta
+
+Aba "Consulta" no front. O fluxo:
+
+```
+pergunta -> POST /api/v1/search -> POST /query no serviço Python
+  -> similarity_search no Pinecone (k=5, filtro opcional por tipo)
+  -> cadeia LCEL: prompt | gpt-4o-mini | StrOutputParser
+  -> resposta com citações [1], [2] + trechos usados
+```
+
+O Rails enriquece as fontes com os dados do Postgres, então o nome do arquivo
+vem do banco e um documento apagado aparece marcado como removido.
+
+### Limitação conhecida: aritmética
+
+O modelo recupera e **lista** os valores corretamente, mas erra as somas.
+Exemplo real, com os dados do `samples/`:
+
+```
+parcelas citadas: 4.930,20 + 1.207,00 + 1.829,00   (todas corretas)
+total informado:  6.966,20
+total correto:    7.966,20
+```
+
+O prompt pede que as parcelas sejam listadas justamente para que o erro fique
+auditável. A correção de verdade é dar uma ferramenta de cálculo ao modelo
+(tool calling) em vez de deixar a soma para a geração de texto.
+
 ## Próxima etapa
 
-Página de consulta: busca semântica no Pinecone + resposta com citação das fontes.
+- Ferramenta de cálculo para as agregações numéricas
+- Resposta em streaming (hoje o front espera a resposta inteira)
+- Histórico de consultas
